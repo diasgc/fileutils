@@ -28,17 +28,14 @@ char* strtab = NULL;
 char* shstrtab = NULL;
 
 
-Elf64_Shdr* section_header(int index)
-{
+Elf64_Shdr* section_header(int index){
     return (Elf64_Shdr*)(file_data + header->e_shoff +
             index * header->e_shentsize);
 }
 
 
-const char* str_p_flags(const long long f)
-{
-    switch (f)
-    {
+const char* str_p_flags(const long long f){
+    switch (f){
         case 1:
             return "PF_X";
         case 2:
@@ -64,12 +61,9 @@ const char* str_p_flags(const long long f)
 }
 
 
-#define next_flag(f, str) \
-{ \
-    if (f & str) \
-    { \
-        if (ret_next != ret) \
-        { \
+#define next_flag(f, str) { \
+    if (f & str) { \
+        if (ret_next != ret) { \
             ret_next += sprintf(ret_next, " | "); \
         } \
         ret_next += sprintf(ret_next, #str); \
@@ -77,8 +71,7 @@ const char* str_p_flags(const long long f)
 }
 
 
-const char* str_sh_flags(const long long f)
-{
+const char* str_sh_flags(const long long f){
     static char ret[256];
     char* ret_next = ret;
 
@@ -103,8 +96,7 @@ const char* str_sh_flags(const long long f)
 }
 
 
-const char* str_st_info(const long long v)
-{
+const char* str_st_info(const long long v){
     static char ret[256];
     char* ret_next = ret;
 
@@ -125,32 +117,24 @@ const char* str_st_info(const long long v)
 }
 
 
-const char* lookup_strtab(const long long v)
-{
-    if (strtab == NULL)
-    {
+const char* lookup_strtab(const long long v){
+    if (strtab == NULL){
         return "Not found";
     }
-
     return strtab + v;
 }
 
 
-const char* lookup_shstrtab(const long long v)
-{
-    if (shstrtab == NULL)
-    {
+const char* lookup_shstrtab(const long long v){
+    if (shstrtab == NULL){
         return "Not found";
     }
-
     return shstrtab + v;
 }
 
 
-const char* str_st_shndx(const long long v)
-{
-    switch (v)
-    {
+const char* str_st_shndx(const long long v){
+    switch (v){
         case 0:
             return "UND";
         case 65521:
@@ -162,44 +146,34 @@ const char* str_st_shndx(const long long v)
 
 
 void add_key(json_object* out, const char* key, long long value,
-             const char* (*converter)(long long l))
-{
-    if (converter)
-    {
-        json_object_object_add(out, key,
-                json_object_new_string(converter(value)));
+             const char* (*converter)(long long l)){
+    if (converter){
+        json_object_object_add(out, key,json_object_new_string(converter(value)));
         return;
     }
-
     json_object_object_add(out, key, json_object_new_int(value));
 }
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
     // Parse command line arguments -------------------------------------------
 
     char* filename = NULL;
     bool arg_fail = false;
 
-    while (--argc)
-    {
-        if (filename != NULL)
-        {
+    while (--argc){
+        if (filename != NULL){
             arg_fail = true;
             break;
         }
-
         filename = argv[argc];
     }
 
-    if (filename == NULL)
-    {
+    if (filename == NULL){
         arg_fail = true;
     }
 
-    if (arg_fail)
-    {
+    if (arg_fail){
         printf("Usage: jsonelf somefile.o\n");
         return ERR_USAGE;
     }
@@ -207,24 +181,21 @@ int main(int argc, char* argv[])
     // Load file into memory --------------------------------------------------
 
     FILE* file = fopen(filename, "r");
-    if (file == NULL)
-    {
+    if (file == NULL){
         printf("Failed to open file\n");
         return ERR_OPEN_FILE;
     }
 
     struct stat file_stat;
 
-    if (fstat(fileno(file), &file_stat) < 0)
-    {
+    if (fstat(fileno(file), &file_stat) < 0){
         printf("Failed to stat file\n");
         return ERR_STAT_FILE;
     }
 
     file_data = malloc(file_stat.st_size * sizeof(char));
 
-    if (!fread(file_data, file_stat.st_size, 1, file))
-    {
+    if (!fread(file_data, file_stat.st_size, 1, file)){
         printf("Failed to read file contents\n");
         return ERR_READ_FILE;
     }
@@ -235,8 +206,7 @@ int main(int argc, char* argv[])
 
     header = (Elf64_Ehdr*)file_data;
 
-    if (header->e_ident[EI_CLASS] != ELFCLASS64)
-    {
+    if (header->e_ident[EI_CLASS] != ELFCLASS64){
         printf("This program only supports 64-bit files\n");
         return ERR_32_BIT;
     }
@@ -245,13 +215,10 @@ int main(int argc, char* argv[])
     shstrtab = file_data + section_header(header->e_shstrndx)->sh_offset;
 
     // Find strtab
-    for (int i = 0; i < header->e_shnum; i++)
-    {
+    for (int i = 0; i < header->e_shnum; i++){
         Elf64_Shdr* sh = section_header(i);
 
-        if (sh->sh_type == SHT_STRTAB &&
-            strcmp(lookup_shstrtab(sh->sh_name), ".strtab") == 0)
-        {
+        if (sh->sh_type == SHT_STRTAB && strcmp(lookup_shstrtab(sh->sh_name), ".strtab") == 0){
             strtab = file_data + sh->sh_offset;
             break;
         }
@@ -293,10 +260,8 @@ int main(int argc, char* argv[])
 
     json_object* program_headers = json_object_new_array();
 
-    for (int i = 0; i < header->e_phnum; i++)
-    {
-        Elf64_Phdr* ph = (Elf64_Phdr*)(file_data + header->e_phoff +
-                i * header->e_phentsize);
+    for (int i = 0; i < header->e_phnum; i++){
+        Elf64_Phdr* ph = (Elf64_Phdr*)(file_data + header->e_phoff + i * header->e_phentsize);
 
         json_object* out = json_object_new_object();
 
@@ -318,8 +283,7 @@ int main(int argc, char* argv[])
 
     json_object* section_headers = json_object_new_array();
 
-    for (int i = 0; i < header->e_shnum; i++)
-    {
+    for (int i = 0; i < header->e_shnum; i++){
         Elf64_Shdr* sh = section_header(i);
 
         json_object* out = json_object_new_object();
@@ -337,8 +301,7 @@ int main(int argc, char* argv[])
 
         // strings ------------------------------------------------------------
 
-        if (sh->sh_type == SHT_STRTAB)
-        {
+        if (sh->sh_type == SHT_STRTAB){
             json_object* strings = json_object_new_array();
 
             char* string = file_data + sh->sh_offset;
@@ -363,15 +326,13 @@ int main(int argc, char* argv[])
 
         // symbols ------------------------------------------------------------
 
-        else if (sh->sh_type == SHT_SYMTAB)
-        {
+        else if (sh->sh_type == SHT_SYMTAB){
             json_object* symbols = json_object_new_array();
 
             void* ptr = file_data + sh->sh_offset;
             void* end = ptr + sh->sh_size;
 
-            while (ptr < end)
-            {
+            while (ptr < end){
                 Elf64_Sym* sym = ptr;
 
                 json_object* symobj = json_object_new_object();
@@ -393,15 +354,13 @@ int main(int argc, char* argv[])
 
         // relocations --------------------------------------------------------
 
-        else if (sh->sh_type == SHT_RELA || sh->sh_type == SHT_REL)
-        {
+        else if (sh->sh_type == SHT_RELA || sh->sh_type == SHT_REL){
             json_object* relocations = json_object_new_array();
 
             void* ptr = file_data + sh->sh_offset;
             void* end = ptr + sh->sh_size;
 
-            while (ptr < end)
-            {
+            while (ptr < end){
                 Elf64_Rela* rela = ptr;
 
                 json_object* out = json_object_new_object();
@@ -409,8 +368,7 @@ int main(int argc, char* argv[])
                 add_key(out, "r_offset", rela->r_offset, NULL);
                 add_key(out, "r_info", rela->r_info, NULL);
 
-                if (sh->sh_type == SHT_RELA)
-                {
+                if (sh->sh_type == SHT_RELA){
                     add_key(out, "r_addend", rela->r_addend, NULL);
                 }
 
@@ -418,11 +376,9 @@ int main(int argc, char* argv[])
 
                 int relo_type = rela->r_info & 0xffffffff;
 
-                switch (header->e_machine)
-                {
+                switch (header->e_machine){
                     case EM_X86_64:
-                        add_key(out, "__relo_type", relo_type,
-                                str_relo_type_x86_64);
+                        add_key(out, "__relo_type", relo_type, str_relo_type_x86_64);
                         break;
                     default:
                         printf("Unrecognized e_machine: %d",
