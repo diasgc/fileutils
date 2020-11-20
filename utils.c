@@ -1,4 +1,22 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+// string.format-like function
+const char *strf(const char *pfmt,...){
+
+  va_list parg;
+  va_start(parg, pfmt);
+  size_t sz;
+
+  sz = snprintf(NULL,0,pfmt,parg);
+  char *pbuff = (char *) malloc(++sz);
+
+  vsprintf(pbuff,pfmt,parg);
+  va_end(arg_ptr);
+
+  return pbuff;
+}
 
 unsigned int reverse_nbit(unsigned int input, const unsigned int shift){
   
