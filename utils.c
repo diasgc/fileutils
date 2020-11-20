@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-unsigned int reverse_nbit(unsigned int input, const unsigned int shift){){
+unsigned int reverse_nbit(unsigned int input, const unsigned int shift){
   unsigned int output = 0;
   unsigned int in = input;
   const unsigned char mask = (1 << shift) - 1;
