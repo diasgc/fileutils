@@ -7,7 +7,7 @@ unsigned int reverse_nbit(unsigned int input, const unsigned int shift){
   while (in != 0)
     {
       output = output << shift;
-      output |= (input & mask);
+      output |= (in & mask);
       in = in >> shift;
     }
   // printf ("mask:%o input:%o output:%o", mask, in, output);
