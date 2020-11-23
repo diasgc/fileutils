@@ -40,3 +40,64 @@ unsigned int reverse_nbit(unsigned int input, unsigned int shift){
     // printf ("mask:%o input:%o output:%o", mask, in, output);
     return output;
 }
+
+static inline uint32_t read32_be(void* dst, const char* src) {
+	((uint8_t*)dst)[0] = src[0];
+	((uint8_t*)dst)[1] = src[1];
+	((uint8_t*)dst)[2] = src[2];
+	((uint8_t*)dst)[3] = src[3];
+    return (uint32_t) 4;
+}
+
+static inline uint32_t read32_le(void* dst, const char* src) {
+	((uint8_t*)dst)[0] = src[3];
+	((uint8_t*)dst)[1] = src[2];
+	((uint8_t*)dst)[2] = src[1];
+	((uint8_t*)dst)[3] = src[0];
+    return (uint32_t) 4;
+}
+
+static inline uint32_t read64_be(void * dst, const char * src){
+	((uint8_t*)dst)[0] = src[0];
+	((uint8_t*)dst)[1] = src[1];
+	((uint8_t*)dst)[2] = src[2];
+	((uint8_t*)dst)[3] = src[3];
+	((uint8_t*)dst)[4] = src[4];
+	((uint8_t*)dst)[5] = src[5];
+	((uint8_t*)dst)[6] = src[6];
+	((uint8_t*)dst)[7] = src[7];
+    return (uint32_t) 8;
+}
+
+static inline uint32_t read64_le(void * dst, const char * src){
+	((uint8_t*)dst)[0] = src[7];
+	((uint8_t*)dst)[1] = src[6];
+	((uint8_t*)dst)[2] = src[5];
+	((uint8_t*)dst)[3] = src[4];
+	((uint8_t*)dst)[4] = src[3];
+	((uint8_t*)dst)[5] = src[2];
+	((uint8_t*)dst)[6] = src[1];
+	((uint8_t*)dst)[7] = src[0];
+    return (uint32_t) 8;
+}
+
+static inline uint32_t read16_be(void* dst, const char* src) {
+	((uint8_t*)dst)[0] = src[0];
+	((uint8_t*)dst)[1] = src[1];
+    return (uint32_t) 2;
+}
+
+static inline uint32_t read16_le(void* dst, const char* src) {
+	((uint8_t*)dst)[0] = src[1];
+	((uint8_t*)dst)[1] = src[0];
+    return (uint32_t) 2;
+}
+
+static inline uint32_t read8(void * dst, const char * src){
+	((uint8_t*)dst)[0] = src[0];
+    return (uint32_t) 1;
+}
+
+float read_2_14_float(int16_t value){
+	return (float(value & 0x3fff) / float(1 << 14)) + (-2 * ((value >> 15) & 0x1) + ((value >> 14) & 0x1));
+}
